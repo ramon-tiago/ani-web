@@ -16,8 +16,6 @@ import { useEffect } from "react";
 export const CategoryList = () => {
   const { data, isFetching, error } = useGetCategoriesQuery("", {});
   const [deleteCategory, deleteCategoryStatus] = useDeleteCategoryMutation();
-  console.log("data");
-  console.log("data");
 
   const { enqueueSnackbar } = useSnackbar();
 
