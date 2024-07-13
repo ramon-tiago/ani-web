@@ -3,11 +3,17 @@ import { useSnackbar } from "notistack";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { Category, selectCategoryById, updateCategory } from "./categorySlice";
+import {
+  Category,
+  selectCategoryById,
+  updateCategory,
+  useGetCategoriesQuery,
+} from "./categorySlice";
 import { CategoryForm } from "./components/CategoryForm";
 
 export const CategoryEdit = () => {
   const id = useParams().id;
+  const { data: category, isFetching } = useGetCategoriesQuery({ id });
   const [isDisabled] = useState(false);
   const categoory = useAppSelector((state) =>
     selectCategoryById(state, id ?? "")

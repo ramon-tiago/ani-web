@@ -41,7 +41,7 @@ export interface CreateCategory {}
 
 export interface CategoryParams {
   page?: number;
-  per_page?: number;
+  perPage?: number;
   search?: string;
   isActive?: boolean;
   sort?: string;

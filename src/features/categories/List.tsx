@@ -1,38 +1,40 @@
-import DeleteIcon from "@mui/icons-material/Delete";
-import { Box, Button, IconButton, Typography } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import { Link } from "react-router-dom";
-import { useAppSelector } from "../../app/hooks";
 import {
-  // deleteCategory,
-  selectCategories,
   useDeleteCategoryMutation,
   useGetCategoriesQuery,
 } from "./categorySlice";
 
-import { GridRenderCellParams } from "@mui/x-data-grid";
+import { GridFilterModel } from "@mui/x-data-grid";
 import { useSnackbar } from "notistack";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { CategoriesTable } from "./components/CategoryTable";
+import { CategoryParams } from "../../types";
 
 export const CategoryList = () => {
-  const { data, isFetching, error } = useGetCategoriesQuery("", {});
+  const [paginationModel, setPaginationModel] = useState({
+    pageSize: 25,
+    page: 1,
+  });
+  const [rowsPerPage] = useState([10, 25, 30]);
+  const [search, setSearch] = useState("");
+
+  const options: Partial<CategoryParams> = {
+    page: paginationModel.page,
+    perPage: paginationModel.pageSize,
+    search,
+  };
+
+  const { data, isFetching, error } = useGetCategoriesQuery(options, {});
   const [deleteCategory, deleteCategoryStatus] = useDeleteCategoryMutation();
 
   const { enqueueSnackbar } = useSnackbar();
 
-  function renderIsActiveCell(row: GridRenderCellParams) {
-    return (
-      <Typography color={row.value ? "primary" : "secondary"}>
-        {row.value ? "Active" : "Inactive"}
-      </Typography>
-    );
-  }
-
-  // const handleDelete = async (id: string) => {
-  //   // dispatch(deleteCategory(id));
-  // enqueueSnackbar("Success delete category", { variant: "success" });
-  // };
   const handleDelete = async (id: string) => {
     await deleteCategory({ id });
+  };
+  const handleFilterChange = async (filterModel: GridFilterModel) => {
+    return setSearch(filterModel?.quickFilterValues?.join("") ?? "");
   };
 
   useEffect(() => {
@@ -42,25 +44,12 @@ export const CategoryList = () => {
     if (deleteCategoryStatus.isError) {
       enqueueSnackbar("Error delete category", { variant: "error" });
     }
-  }, [deleteCategoryStatus, enqueueSnackbar]);
+    if (error) {
+      console.error("Error fetching categories:", error);
+      enqueueSnackbar("Error fetching categories", { variant: "error" });
+    }
+  }, [deleteCategoryStatus, enqueueSnackbar, error]);
 
-  function renderActiionsCell(params: GridRenderCellParams) {
-    return (
-      <IconButton
-        color="secondary"
-        onClick={() => handleDelete(params.value)}
-        aria-label="delete"
-      >
-        <DeleteIcon />
-
-        <Link to={`/categories/edit/${params.row.id}`}>
-          <Button variant="contained" color="primary">
-            Edit
-          </Button>
-        </Link>
-      </IconButton>
-    );
-  }
   return (
     <Box maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       <Box display="fles" justifyContent="flex-end">
@@ -74,6 +63,15 @@ export const CategoryList = () => {
           New Category
         </Button>
       </Box>
+      <CategoriesTable
+        data={data}
+        rowsPerPage={rowsPerPage}
+        isFetching={isFetching}
+        handleDelete={handleDelete}
+        handleFilterChange={handleFilterChange}
+        paginationModel={paginationModel}
+        setPaginationModel={setPaginationModel}
+      ></CategoriesTable>
     </Box>
   );
 };

@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { RootState } from "../../app/store";
 import { apiSlice, categoriesApi } from "../api/apiSlie";
-import { Result, Results } from "../../types";
+import { CategoryParams, Result, Results } from "../../types";
 
 export interface Category {
   id: string;
@@ -13,18 +13,43 @@ export interface Category {
   updated_at: Date | null;
 }
 
-const endpoint: string = "/categories";
+const endpoint: string = "/category";
+
+function parseQueryParams(params: CategoryParams) {
+  const query = new URLSearchParams();
+
+  if (params.page) query.append("page", params.page.toString());
+  if (params.search) query.append("search", params.search.toString());
+  if (params.perPage) query.append("per_page", params.perPage.toString());
+  if (params.isActive) query.append("is_active", params.isActive.toString());
+  return query.toString();
+}
+
+function getCategories({ page = 1, perPage = 10, search = "" }) {
+  const params = { page, perPage, search, isActive: true };
+  return `${endpoint}?${parseQueryParams(params)}`;
+}
 
 const deleteCategoryMutation = (category: Category) => ({
   url: `${endpoint}/${category.id}`,
   method: "DELETE",
 });
 
+const createCategoryMutation = (category: Category) => ({
+  url: endpoint,
+  method: "POST",
+  body: category,
+});
+
 export const categoriesApiSlice = categoriesApi.injectEndpoints({
   endpoints: ({ query, mutation }) => ({
-    getCategories: query<Results, string>({
-      query: () => `${endpoint}`,
+    getCategories: query<Results, CategoryParams>({
+      query: getCategories,
       providesTags: ["Categories"],
+    }),
+    createCategory: mutation<Result, Category>({
+      query: createCategoryMutation,
+      invalidatesTags: ["Categories"],
     }),
     deleteCategory: mutation<Result, { id: string }>({
       query: deleteCategoryMutation,
@@ -88,5 +113,8 @@ export const categoriesReducer = categoriesSlice.reducer;
 export const { createCategory, deleteCategory, updateCategory } =
   categoriesSlice.actions;
 
-export const { useGetCategoriesQuery, useDeleteCategoryMutation } =
-  categoriesApiSlice;
+export const {
+  useGetCategoriesQuery,
+  useDeleteCategoryMutation,
+  useCreateCategoryMutation,
+} = categoriesApiSlice;
