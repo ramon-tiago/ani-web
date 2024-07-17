@@ -10,6 +10,7 @@ import { useSnackbar } from "notistack";
 import { useEffect, useState } from "react";
 import { CategoriesTable } from "./components/CategoryTable";
 import { CategoryParams } from "../../types";
+import { useGetCastMembersQuery } from "../cast";
 
 export const CategoryList = () => {
   const [paginationModel, setPaginationModel] = useState({
@@ -19,11 +20,11 @@ export const CategoryList = () => {
   const [rowsPerPage] = useState([10, 25, 30]);
   const [search, setSearch] = useState("");
 
-  const options: Partial<CategoryParams> = {
+  const [options, setOptions] = useState({
     page: paginationModel.page,
     perPage: paginationModel.pageSize,
-    search,
-  };
+    search: "",
+  });
 
   const { data, isFetching, error } = useGetCategoriesQuery(options, {});
   const [deleteCategory, deleteCategoryStatus] = useDeleteCategoryMutation();
@@ -34,6 +35,13 @@ export const CategoryList = () => {
     await deleteCategory({ id });
   };
   const handleFilterChange = async (filterModel: GridFilterModel) => {
+    // if (filterModel.quickFilterValues?.length) {
+    //   const search = filterModel.quickFilterValues.join('');
+    //   options.search = search;
+    //   setOptions({...options, search });
+    // }
+    // return setOptions({...options, search: '' });
+
     return setSearch(filterModel?.quickFilterValues?.join("") ?? "");
   };
 

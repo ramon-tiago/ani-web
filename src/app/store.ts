@@ -1,6 +1,7 @@
 import { configureStore, ThunkAction, Action } from "@reduxjs/toolkit";
 import { categoriesApiSlice, categoriesReducer } from "../features/categories";
 import { apiSlice } from "../features/api/apiSlie";
+import { castMembersSlice } from "../features/cast";
 
 // export const store = configureStore({
 //   reducer: {
@@ -16,10 +17,11 @@ export const store = configureStore({
     categories: categoriesReducer,
     // [apiSlice.reducerPath]: apiSlice.reducer,
     // [categoriesApiSlice.reducerPath]: apiSlice.reducer,
-    [categoriesApiSlice.reducerPath]: categoriesApiSlice.reducer,
+    [categoriesApiSlice.reducerPath]: apiSlice.reducer,
+    [castMembersSlice.reducerPath]: apiSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(categoriesApiSlice.middleware),
+    getDefaultMiddleware().concat(apiSlice.middleware),
 });
 
 export type AppDispatch = typeof store.dispatch;

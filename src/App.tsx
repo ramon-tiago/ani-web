@@ -11,6 +11,7 @@ import {
   CategoryEdit,
   CategoryList,
 } from "./features/categories";
+import { ListCastMembers } from "./features/cast";
 
 const PageNotFound = () => (
   <Box sx={{ color: "white" }}>
@@ -44,9 +45,16 @@ function App() {
           <Layout>
             <Routes>
               <Route path="/" element={<CategoryList />} />
+              {/* Category */}
               <Route path="/categories" element={<CategoryList />} />
               <Route path="/category/new" element={<CategoryCreate />} />
               <Route path="/categories/edit/:id" element={<CategoryEdit />} />
+
+              {/* Cast Members */}
+
+              <Route path="/cast-members" element={<ListCastMembers />} />
+              <Route path="/cast-member/new" element={<CategoryCreate />} />
+              <Route path="/cast-members/edit/:id" element={<CategoryEdit />} />
 
               <Route path="*" element={<PageNotFound />} />
             </Routes>
