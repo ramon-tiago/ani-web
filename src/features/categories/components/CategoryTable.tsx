@@ -50,7 +50,7 @@ export function CategoriesTable({
   const rowCount = data?.meta.total ?? 0;
 
   const columns: GridColDef[] = [
-    { field: "name", headerName: "Name", flex: 1 },
+    { field: "name", headerName: "Name", flex: 1, renderCell: renderNameCell },
     {
       field: "is_active",
       headerName: "Active",
@@ -67,6 +67,17 @@ export function CategoriesTable({
       renderCell: renderActiionsCell,
     },
   ];
+
+  function renderNameCell(params: GridRenderCellParams) {
+    return (
+      <Link
+        style={{ textDecoration: "none" }}
+        to={`/categories/edit/${params.id}`}
+      >
+        <Typography color="primary">{params.value}</Typography>
+      </Link>
+    );
+  }
 
   const componentProps = {
     toolbar: {

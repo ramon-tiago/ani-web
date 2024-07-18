@@ -7,7 +7,7 @@ import {
   GridToolbar,
 } from "@mui/x-data-grid";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { Results } from "../../../types";
+import { ResultsCast } from "../../../types";
 import { Box, Button, IconButton, Typography } from "@mui/material";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -18,7 +18,7 @@ interface PaginationModel {
 }
 
 type Props = {
-  data: Results | undefined;
+  data: ResultsCast | undefined;
   isFetching: boolean;
   rowsPerPage?: number[];
 
@@ -36,13 +36,10 @@ export function CastMemberTable({
   paginationModel,
   setPaginationModel,
 }: Props) {
-  function mapDataToGridRows(data: Results) {
-    const { data: categories } = data;
-    return categories.map((category) => ({
-      ...category,
-      created_at: category.created_at
-        ? new Date(category.created_at).toLocaleDateString("pt-BR")
-        : "",
+  function mapDataToGridRows(data: ResultsCast) {
+    const { data: castMembers } = data;
+    return castMembers.map((cast) => ({
+      ...cast,
     }));
   }
 
@@ -50,19 +47,16 @@ export function CastMemberTable({
   const rowCount = data?.meta.total ?? 0;
 
   const columns: GridColDef[] = [
-    { field: "name", headerName: "Name", flex: 1 },
+    { field: "name", headerName: "Name", flex: 1, renderCell: renderNameCell },
     {
-      field: "is_active",
-      headerName: "Active",
+      field: "type",
+      headerName: "Type",
       flex: 1,
-      type: "boolean",
-      renderCell: renderIsActiveCell,
+      renderCell: renderTypeCell,
     },
-    { field: "created_at", headerName: "Created At", flex: 1 },
     {
       field: "id",
       headerName: "Actions",
-      type: "string",
       flex: 1,
       renderCell: renderActiionsCell,
     },
@@ -75,17 +69,23 @@ export function CastMemberTable({
     },
   };
 
-  function renderIsActiveCell(row: GridRenderCellParams) {
+  function renderNameCell(params: GridRenderCellParams) {
     return (
-      <Typography color={row.value ? "primary" : "secondary"}>
-        {row.value ? "Active" : "Inactive"}
+      <Link
+        style={{ textDecoration: "none" }}
+        to={`/categories/edit/${params.id}`}
+      >
+        <Typography color="primary">{params.value}</Typography>
+      </Link>
+    );
+  }
+  function renderTypeCell(params: GridRenderCellParams) {
+    return (
+      <Typography color="primary">
+        {params.value === 1 ? "Diretor" : "Actor"}
       </Typography>
     );
   }
-
-  useEffect(() => {
-    console.log("paginationModel", paginationModel);
-  }, [paginationModel]);
 
   function renderActiionsCell(params: GridRenderCellParams) {
     return (
@@ -96,14 +96,18 @@ export function CastMemberTable({
       >
         <DeleteIcon />
 
-        <Link to={`/categories/edit/${params.row.id}`}>
+        {/* <Link to={`/categories/edit/${params.row.id}`}>
           <Button variant="contained" color="primary">
             Edit
           </Button>
-        </Link>
+        </Link> */}
       </IconButton>
     );
   }
+
+  useEffect(() => {
+    console.log("paginationModel", paginationModel);
+  }, [paginationModel]);
 
   return (
     <Box sx={{ display: "flex", height: 600 }}>

@@ -1,61 +1,63 @@
+import { Box, Button, Typography } from "@mui/material";
+import { GridFilterModel } from "@mui/x-data-grid";
+import { useSnackbar } from "notistack";
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import {
   useDeleteCastMemberMutation,
   useGetCastMembersQuery,
 } from "./castMembersSile";
-import { CastMembersParams } from "../../types";
-import { useSnackbar } from "notistack";
-import { GridFilterModel } from "@mui/x-data-grid";
-import { Box, Button, Typography } from "@mui/material";
-import { Link } from "react-router-dom";
+import { CastMemberTable } from "./components/CastMemberTable";
 
 export function ListCastMembers() {
-  const [paginationModel, setPaginationModel] = useState({
+  const [paginationModel] = useState({
     pageSize: 25,
     page: 1,
   });
-  const [rowsPerPage] = useState([10, 25, 50, 100]);
-  const [search, setSearch] = useState("");
-
   const [options, setOptions] = useState({
     page: paginationModel.page,
     perPage: paginationModel.pageSize,
     search: "",
+    rowsPerPage: [10, 25, 50, 100],
   });
   const { enqueueSnackbar } = useSnackbar();
-
   const { data, isFetching, error } = useGetCastMembersQuery(options, {});
   const [deleteCast, deleteCastStatus] = useDeleteCastMemberMutation();
 
   const handleDelete = async (id: string) => {
     await deleteCast({ id });
   };
+
   const handleFilterChange = async (filterModel: GridFilterModel) => {
     if (filterModel.quickFilterValues?.length) {
       const search = filterModel.quickFilterValues.join("");
-      options.search = search;
-      setSearch(search);
+      setOptions((prev) => ({ ...prev, search }));
+    } else {
+      setOptions((prev) => ({ ...prev, search: "" }));
     }
-    return setSearch("");
   };
 
-  useEffect(() => {
-    setOptions((op) => ({
-      ...op,
-      page: paginationModel.page,
-      perPage: paginationModel.pageSize,
+  const handleOnPageChange = ({
+    pageSize,
+    page,
+  }: {
+    pageSize: number;
+    page: number;
+  }) => {
+    setOptions((prev) => ({
+      ...prev,
+      page,
+      perPage: pageSize,
     }));
-  }, [paginationModel]);
+  };
 
   useEffect(() => {
     if (deleteCastStatus.isSuccess)
       enqueueSnackbar("Success delete category", { variant: "success" });
     if (deleteCastStatus.isError)
       enqueueSnackbar("Error delete category", { variant: "error" });
-    if (error) {
-      console.error("Error fetching cast members:", error);
+    if (error)
       enqueueSnackbar("Error fetching cast members", { variant: "error" });
-    }
   }, [deleteCastStatus, enqueueSnackbar, error]);
 
   if (error) {
@@ -75,15 +77,15 @@ export function ListCastMembers() {
           New Cast Member
         </Button>
       </Box>
-      {/* <CategoriesTable
+      <CastMemberTable
         data={data}
-        rowsPerPage={rowsPerPage}
+        rowsPerPage={options.rowsPerPage}
         isFetching={isFetching}
         handleDelete={handleDelete}
         handleFilterChange={handleFilterChange}
         paginationModel={paginationModel}
-        setPaginationModel={setPaginationModel}
-      ></CategoriesTable> */}
+        setPaginationModel={handleOnPageChange}
+      ></CastMemberTable>
     </Box>
   );
 }

@@ -1,62 +1,68 @@
 import { Box, Button, Typography } from "@mui/material";
+import { GridFilterModel } from "@mui/x-data-grid";
+import { useSnackbar } from "notistack";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   useDeleteCategoryMutation,
   useGetCategoriesQuery,
 } from "./categorySlice";
-
-import { GridFilterModel } from "@mui/x-data-grid";
-import { useSnackbar } from "notistack";
-import { useEffect, useState } from "react";
 import { CategoriesTable } from "./components/CategoryTable";
-import { CategoryParams } from "../../types";
-import { useGetCastMembersQuery } from "../cast";
 
 export const CategoryList = () => {
-  const [paginationModel, setPaginationModel] = useState({
+  const [paginationModel] = useState({
     pageSize: 25,
     page: 1,
   });
-  const [rowsPerPage] = useState([10, 25, 30]);
-  const [search, setSearch] = useState("");
-
   const [options, setOptions] = useState({
     page: paginationModel.page,
     perPage: paginationModel.pageSize,
     search: "",
+    rowsPerPage: [10, 25, 50, 100],
   });
-
+  const { enqueueSnackbar } = useSnackbar();
   const { data, isFetching, error } = useGetCategoriesQuery(options, {});
   const [deleteCategory, deleteCategoryStatus] = useDeleteCategoryMutation();
-
-  const { enqueueSnackbar } = useSnackbar();
 
   const handleDelete = async (id: string) => {
     await deleteCategory({ id });
   };
-  const handleFilterChange = async (filterModel: GridFilterModel) => {
-    // if (filterModel.quickFilterValues?.length) {
-    //   const search = filterModel.quickFilterValues.join('');
-    //   options.search = search;
-    //   setOptions({...options, search });
-    // }
-    // return setOptions({...options, search: '' });
 
-    return setSearch(filterModel?.quickFilterValues?.join("") ?? "");
+  const handleFilterChange = async (filterModel: GridFilterModel) => {
+    if (filterModel.quickFilterValues?.length) {
+      const search = filterModel.quickFilterValues.join("");
+      setOptions((prev) => ({ ...prev, search }));
+    } else {
+      setOptions((prev) => ({ ...prev, search: "" }));
+    }
+  };
+
+  const handleOnPageChange = ({
+    pageSize,
+    page,
+  }: {
+    pageSize: number;
+    page: number;
+  }) => {
+    setOptions((prev) => ({
+      ...prev,
+      page,
+      perPage: pageSize,
+    }));
   };
 
   useEffect(() => {
-    if (deleteCategoryStatus.isSuccess) {
+    if (deleteCategoryStatus.isSuccess)
       enqueueSnackbar("Success delete category", { variant: "success" });
-    }
-    if (deleteCategoryStatus.isError) {
+    if (deleteCategoryStatus.isError)
       enqueueSnackbar("Error delete category", { variant: "error" });
-    }
-    if (error) {
-      console.error("Error fetching categories:", error);
+    if (error)
       enqueueSnackbar("Error fetching categories", { variant: "error" });
-    }
   }, [deleteCategoryStatus, enqueueSnackbar, error]);
+
+  if (error) {
+    return <Typography variant="h2">Error fetching cast members</Typography>;
+  }
 
   return (
     <Box maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
@@ -73,12 +79,12 @@ export const CategoryList = () => {
       </Box>
       <CategoriesTable
         data={data}
-        rowsPerPage={rowsPerPage}
+        rowsPerPage={options.rowsPerPage}
         isFetching={isFetching}
         handleDelete={handleDelete}
         handleFilterChange={handleFilterChange}
         paginationModel={paginationModel}
-        setPaginationModel={setPaginationModel}
+        setPaginationModel={handleOnPageChange}
       ></CategoriesTable>
     </Box>
   );

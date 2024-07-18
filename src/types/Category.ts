@@ -5,9 +5,9 @@ export interface Category {
   name: string;
   description: string | null;
   is_active: boolean;
-  deleted_at: Date | null;
-  created_at: Date | null;
-  updated_at: Date | null;
+  deleted_at: string | null;
+  created_at: string | null;
+  updated_at: string | null;
 }
 
 export interface CategoryParams {

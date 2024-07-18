@@ -4,9 +4,9 @@ export interface CastMembers {
   id: string;
   name: string;
   type: number;
-  deleted_at: Date | null;
-  created_at: Date | null;
-  updated_at: Date | null;
+  deleted_at: string | null;
+  created_at: string | null;
+  updated_at: string | null;
 }
 
 export interface CastMembersParams {

@@ -8,9 +8,9 @@ export interface Category {
   name: string;
   description: string | null;
   is_active: boolean;
-  deleted_at: Date | null;
-  created_at: Date | null;
-  updated_at: Date | null;
+  deleted_at: string | null;
+  created_at: string | null;
+  updated_at: string | null;
 }
 
 const endpoint: string = "/category";
@@ -84,8 +84,8 @@ const category: Category = {
   description: "",
   is_active: true,
   deleted_at: null,
-  created_at: new Date(),
-  updated_at: new Date(),
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
 };
 
 export const initialState = [
